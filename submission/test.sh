@@ -179,7 +179,7 @@ check_cmd "Getting address info"
 
 # STUDENT TASK: Extract the internal key (the x-only pubkey) from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-INTERNAL_KEY=$(echo "$ADDR_INFO" | sed -n 's/.*\]\([^#]*\)#.*/\1/p')
+INTERNAL_KEY=$(echo "$ADDR_INFO" | sed -n 's/.*"desc": "tr(\[[^]]*\]\([^)]*\)).*/\1/p')
 check_cmd "Extracting key from descriptor"
 INTERNAL_KEY=$(trim "$INTERNAL_KEY")
 
@@ -198,13 +198,14 @@ echo "Taproot treasure map: $TAPROOT_DESCRIPTOR"
 
 # STUDENT TASK: Derive an address from the descriptor
 # WRITE YOUR SOLUTION BELOW:
-DERIVED_ADDRESS=$(bitcoin-cli -regtest deriveaddresses "$TAPROOT_DESCRIPTOR" | sed -n 's/^\[\s*"\(.*\)"\s*\]$/\1/p')
+DERIVED_ADDRESS=$(bitcoin-cli -regtest deriveaddresses "$TAPROOT_DESCRIPTOR" | grep -o '"[^"]*"' | sed -n 2p | tr -d '"')
 check_cmd "Address derivation"
+DERIVED_ADDR=$(echo "$DERIVED_ADDRESS" | tr -d '[]" \n\t')
 echo "Derived quantum vault address: $DERIVED_ADDRESS"
 
 # Verify the addresses match
 echo "New taproot address: $NEW_TAPROOT_ADDR"
-echo "Derived address:     $DERIVED_ADDR"
+echo "Derived address: $DERIVED_ADDR"
 
 # Debug output to help diagnose any issues
 echo "Address lengths: ${#NEW_TAPROOT_ADDR} vs ${#DERIVED_ADDR}"
